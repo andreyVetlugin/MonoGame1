@@ -24,11 +24,21 @@ namespace MonoGame1.InGameEnvironment
         //public void MovePlayer()
         //{ } /////!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+        static public bool IsCellPassable(MapCell cell)
+        {
+            return cell == MapCell.LootBox || cell == MapCell.None;
+        }
+
         public Map(Map anotherMap)
         {
             Size = anotherMap.Size;
             Cells = new MapCell[anotherMap.Size.X, anotherMap.Size.Y];
             Array.Copy(anotherMap.Cells, Cells, anotherMap.Cells.Length);
+        }
+
+        public bool IsCoordInsideMap(Point coord)
+        {
+            return coord.X >= 0 && coord.X < Size.X && coord.Y > 0 && coord.Y < Size.Y;
         }
 
         public Map(MapCell[,] anotherCells)
