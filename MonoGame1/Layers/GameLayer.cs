@@ -11,7 +11,7 @@ namespace MonoGame1.Layers
     public class GameLayer : ILayer
     {
         private Map map;
-        private WorldActivityCalculator mapCalculator;
+        private WorldActivityCalculator worldCalculator;
         //Draw parameters
         private TimeSpan stepTime = TimeSpan.FromSeconds(2);
         private TimeSpan elapsedTimeFromLastStep = TimeSpan.Zero;
@@ -21,12 +21,16 @@ namespace MonoGame1.Layers
         private PathManager playerPathManager;        
 
         public GameLayer(Map map = null)
-        {
-            this.map = new Map();
-            this.map.LoadMapFromNothing();
-            playerPathManager = new PathManager(this.map);            
+        {            
+            var mapAsPattern = new Map();
+            mapAsPattern.LoadMapFromNothing();
+
+            worldCalculator = new WorldActivityCalculator(mapAsPattern);
+            this.map = worldCalculator.currentMap;
+
+            playerPathManager = new PathManager(mapAsPattern);            
             playerPathManager.FindPathToClosestLootBox();
-            mapCalculator = new WorldActivityCalculator(this.map);
+            
         }
 
         public void DrawMap()
@@ -55,11 +59,9 @@ namespace MonoGame1.Layers
             if (elapsedTimeFromLastStep >= stepTime)
             {
                 elapsedTimeFromLastStep = TimeSpan.Zero;
-                map.TryToMovePlayer(playerPathManager.GetNextStep());                
-                //if()
-            }
-                // move player and updateMap
-            return;
+                map.TryToMovePlayer(playerPathManager.GetNextStep());
+                worldCalculator.Tick();
+            }            
         }
 
         public void FirstDrawCall(GameTime gameTime, GraphicsData graphicsData)
