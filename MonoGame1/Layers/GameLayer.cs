@@ -11,16 +11,22 @@ namespace MonoGame1.Layers
     public class GameLayer : ILayer
     {
         private Map map;
-
+        private WorldActivityCalculator mapCalculator;
         //Draw parameters
+        private TimeSpan stepTime = TimeSpan.FromSeconds(2);
+        private TimeSpan elapsedTimeFromLastStep = TimeSpan.Zero;
         private Vector2 cellSize;
         private Color pixelColor = Color.Red;
         private const int pixelWidth = 2;
+        private PathManager playerPathManager;        
 
-        public GameLayer()
+        public GameLayer(Map map = null)
         {
-            map = new Map();
-            map.LoadMapFromNothing();
+            this.map = new Map();
+            this.map.LoadMapFromNothing();
+            playerPathManager = new PathManager(this.map);            
+            playerPathManager.FindPathToClosestLootBox();
+            mapCalculator = new WorldActivityCalculator(this.map);
         }
 
         public void DrawMap()
@@ -39,19 +45,20 @@ namespace MonoGame1.Layers
 
         public void Draw(GameTime gameTime, GraphicsData graphicsData)
         {
+            DrawMap();
             return;
         }
 
         public void Update(GameTime gameTime)
-        {
-            var activityActions = new WorldActivityCalculator(map);
-            activityActions.Tick();
-            activityActions.Tick();
-            activityActions.Tick();
-
-
-            var pathFinder = new PathFinder(map);
-            var test = pathFinder.FindPathToClosestLootBox();
+        {   
+            elapsedTimeFromLastStep += gameTime.ElapsedGameTime;
+            if (elapsedTimeFromLastStep >= stepTime)
+            {
+                elapsedTimeFromLastStep = TimeSpan.Zero;
+                map.TryToMovePlayer(playerPathManager.GetNextStep());                
+                //if()
+            }
+                // move player and updateMap
             return;
         }
 

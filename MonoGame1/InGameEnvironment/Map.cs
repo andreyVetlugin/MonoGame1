@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace MonoGame1.InGameEnvironment
 {
@@ -15,14 +14,62 @@ namespace MonoGame1.InGameEnvironment
         LootBox = 4
     }
 
+    public enum Direction
+    {
+        None = 0,
+        Up=1,
+        Down = 2,        
+        Right = 3,
+        Left = 4,        
+    }
+
     public class Map
     {
         public Point Size { get; private set; }
         public MapCell[,] Cells;
-        public Point PlayerPosition { get; private set; }
+        public Point PlayerPosition
+        {
+            get
+            {
+                if (!playerPosition.HasValue)
+                {
+                    SpawnPlayer();
+                    TryToFindPlayerPosition();
+                }
+                return playerPosition.Value;
+            }
+        }
+        private Point? playerPosition;
 
-        //public void MovePlayer()
-        //{ } /////!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        static private Point GetMoveVectorByDirection(Direction moveDirection)
+        {
+            switch (moveDirection)
+            {
+                case Direction.Up:
+                    return new Point(0, 1); ;
+                case Direction.Down:
+                    return new Point(0, -1);
+                case Direction.Left:
+                    return new Point(-1, 0);
+                case Direction.Right:
+                    return new Point(1, 0);
+            }
+            return new Point(0, 0);
+        }
+        static public Direction GetDiretionByPoints(Point startPoint, Point endPoint)
+        {
+            var resultPoint = endPoint - startPoint;
+            if (resultPoint == new Point(0, 1))
+                return Direction.Up;
+            if (resultPoint == new Point(0, -1))
+                return Direction.Down;
+            if (resultPoint == new Point(1, 0))
+                return Direction.Right;
+            if (resultPoint == new Point(-1, 0))
+                return Direction.Left;
+            return Direction.None;
+        }
+
 
         static public bool IsCellPassable(MapCell cell)
         {
@@ -36,9 +83,17 @@ namespace MonoGame1.InGameEnvironment
             Array.Copy(anotherMap.Cells, Cells, anotherMap.Cells.Length);
         }
 
+        public bool TryToMovePlayer(Direction moveDirection)
+        {
+            Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.None;
+            playerPosition += GetMoveVectorByDirection(moveDirection);
+            Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.Player;
+            return true;
+        }
+
         public bool IsCoordInsideMap(Point coord)
         {
-            return coord.X >= 0 && coord.X < Size.X && coord.Y > 0 && coord.Y < Size.Y;
+            return coord.X >= 0 && coord.X < Size.X && coord.Y >= 0 && coord.Y < Size.Y;
         }
 
         public Map(MapCell[,] anotherCells)
@@ -65,7 +120,7 @@ namespace MonoGame1.InGameEnvironment
                 for (int j = 0; j < Size.Y; j++)
                     if (Cells[i, j] == MapCell.Player)
                     {
-                        PlayerPosition = new Point(i, j);
+                        playerPosition = new Point(i, j);
                         return true;
                     }
             return false; // на карте нет игрока 
