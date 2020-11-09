@@ -17,9 +17,9 @@ namespace MonoGame1.RenderTools
         }
 
         public void DrawPixel(Vector2 startPoint,
-            Vector2 scale,            
+            Vector2 scale,
             Color color)
-        {            
+        {
             this.Draw(pixel,
                 startPoint,
                 null,
@@ -28,6 +28,14 @@ namespace MonoGame1.RenderTools
                 new Vector2(0, 0),
                 scale,
                 SpriteEffects.None, 0);
+        }
+
+        public void DrawRectangle(Vector2 startPoint, Vector2 size, Color color)
+        {
+            DrawPixel(startPoint, new Vector2(size.X, 1), color);
+            DrawPixel(startPoint, new Vector2(1, size.Y), color);
+            DrawPixel(new Vector2(startPoint.X, startPoint.Y + size.Y), new Vector2(size.X, 1), color);
+            DrawPixel(new Vector2(size.X + startPoint.X, startPoint.Y), new Vector2(1, size.Y), color);
         }
     }
 }

@@ -12,8 +12,8 @@ namespace MonoGame1.Layers
 
         public void Draw(GameTime gameTime, GraphicsData graphicsData);
 
-        public void FirstDrawCall(GameTime gameTime, GraphicsData graphicsData);
+        //public void FirstDrawCall(GameTime gameTime, GraphicsData graphicsData);
 
-        public void FirstUpdateCAll(GameTime gameTime);
+        //public void FirstUpdateCAll(GameTime gameTime);
     }
 }

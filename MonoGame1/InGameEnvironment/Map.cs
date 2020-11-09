@@ -81,6 +81,7 @@ namespace MonoGame1.InGameEnvironment
             Size = anotherMap.Size;
             Cells = new MapCell[anotherMap.Size.X, anotherMap.Size.Y];
             Array.Copy(anotherMap.Cells, Cells, anotherMap.Cells.Length);
+            TryToFindPlayerPosition();
         }
 
         public bool TryToMovePlayer(Direction moveDirection)

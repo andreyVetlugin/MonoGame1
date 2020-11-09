@@ -8,30 +8,35 @@ namespace MonoGame1.Layers
 {
     public class LayersManager
     {
+        private Game1 game;
         private GameLayer gameLayer;
         private MainMenuLayer mainMenuLayer;
-        private bool firstLayerCall = true;
         public ILayer CurrentLayer {  get; private set; }
 
-        public LayersManager()
+        public LayersManager(Game1 game)
         {
             gameLayer = new GameLayer();
             mainMenuLayer = new MainMenuLayer();
-            CurrentLayer = gameLayer;
+            this.game = game;
+            mainMenuLayer.ExitLayer += game.Exit;
+            ChangeLayerToMainMenu();
         }
 
         public void ChangeLayer(ILayer nextLayer)
         {
             CurrentLayer = nextLayer;
-            firstLayerCall = true;
         }
 
         public void ChangeLayerToGame()
         {
+            game.IsMouseVisible = false;
+            CurrentLayer = gameLayer;
         }
 
         public void ChangeLayerToMainMenu()
         {
+            game.IsMouseVisible = true;
+            CurrentLayer = mainMenuLayer;
         }
 
         public void UpdateLayer(GameTime time)
@@ -42,10 +47,7 @@ namespace MonoGame1.Layers
 
         public void DrawLayer(GameTime time, GraphicsData graphicsData)
         {
-            if (firstLayerCall)
-                CurrentLayer.FirstDrawCall(time,graphicsData);
             CurrentLayer.Draw(time,graphicsData);
-            firstLayerCall = false; // либо сделать отдельные флаги для update и draw
         }
     }
 }
