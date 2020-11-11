@@ -2,10 +2,9 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame1.InGameEnvironment;
 using MonoGame1.InGameEnvironment.MapExtentions;
+using MonoGame1.Logs;
 using MonoGame1.RenderTools;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MonoGame1.Layers
 {
@@ -20,20 +19,22 @@ namespace MonoGame1.Layers
         private const int pixelWidth = 2;
         private PathManager playerPathManager;
 
-        public GameLayer(Map map = null)
+        public event Action<GameInfoLog> AcceptGameInfo;
+
+        public GameLayer(Map map )
         {
-            var mapAsPattern = new Map();
-            mapAsPattern.LoadMapFromNothing();
+            var mapAsPattern = map;
 
             worldCalculator = new WorldActivityCalculator(mapAsPattern);
             this.map = worldCalculator.currentMap;
 
             playerPathManager = new PathManager(mapAsPattern);
             playerPathManager.FindPathToClosestLootBox();
-
+            AcceptGameInfo?.Invoke
+                (new GameInfoLog(playerPathManager.GetCoordinatePath(),map.GetLootCoordinates(),map.PlayerPosition));
         }
 
-        public void DrawMap(GraphicsData graphicsData)
+        public void DrawMap(GraphicsData GraphicsData)
         {
             for (int x = 0; x < map.Size.X; x++)
             {
@@ -42,44 +43,43 @@ namespace MonoGame1.Layers
                     switch (map.Cells[x, y])
                     {
                         case MapCell.Player:
-                            DrawMapObjectCell(graphicsData, Color.Green, x, y);
+                            DrawMapObjectCell(GraphicsData, Color.Green, x, y);
                             break;
                         case MapCell.Block:
-                            DrawMapObjectCell(graphicsData, Color.Gray, x, y);
+                            DrawMapObjectCell(GraphicsData, Color.Gray, x, y);
                             break;
                         case MapCell.LiveBlock:
-                            DrawMapObjectCell(graphicsData, Color.GreenYellow, x, y);
+                            DrawMapObjectCell(GraphicsData, Color.GreenYellow, x, y);
                             break;
                         case MapCell.LootBox:
-                            DrawMapObjectCell(graphicsData, Color.White, x, y);
+                            DrawMapObjectCell(GraphicsData, Color.White, x, y);
                             break;
-                            
                     }
                 }
             }
-
         }
 
-        private void DrawMapObjectCell(GraphicsData graphicsData, Color color,int x,int y)
+        private void DrawMapObjectCell(GraphicsData GraphicsData, Color color,int x,int y)
         {
-            graphicsData.SpriteBatch.DrawPixel(new Vector2(x * cellSize.X + 3, y * cellSize.Y + 3), new Vector2(cellSize.X - 4, cellSize.Y - 4), color);
+            GraphicsData.SpriteBatch.DrawPixel(new Vector2(x * cellSize.X + 3, y * cellSize.Y + 3), new Vector2(cellSize.X - 4, cellSize.Y - 4), color);
         }
-        private void DrawGrid(GraphicsData graphicsData)
+
+        private void DrawGrid(GraphicsData GraphicsData)
         {
             var gridColor = Color.Red;
-            cellSize = new Vector2(graphicsData.Graphics.GraphicsDevice.Viewport.Width / map.Size.X, graphicsData.Graphics.GraphicsDevice.Viewport.Height / map.Size.Y);  // потом менять только при изменении ока и при инициализации
-            for (int h = 0; h <= graphicsData.Graphics.GraphicsDevice.Viewport.Height; h += (int)cellSize.Y)
-                graphicsData.SpriteBatch.DrawPixel(new Vector2(0, h), new Vector2(graphicsData.Graphics.GraphicsDevice.Viewport.Width, pixelWidth), gridColor);
-            for (int w = 0; w <= graphicsData.Graphics.GraphicsDevice.Viewport.Width; w += (int)cellSize.X)
-                graphicsData.SpriteBatch.DrawPixel(new Vector2(w, 0), new Vector2(pixelWidth, graphicsData.Graphics.GraphicsDevice.Viewport.Height), gridColor);
+            cellSize = new Vector2(GraphicsData.Graphics.GraphicsDevice.Viewport.Width / map.Size.X, GraphicsData.Graphics.GraphicsDevice.Viewport.Height / map.Size.Y);  // потом менять только при изменении ока и при инициализации
+            for (int h = 0; h <= GraphicsData.Graphics.GraphicsDevice.Viewport.Height; h += (int)cellSize.Y)
+                GraphicsData.SpriteBatch.DrawPixel(new Vector2(0, h), new Vector2(GraphicsData.Graphics.GraphicsDevice.Viewport.Width, pixelWidth), gridColor);
+            for (int w = 0; w <= GraphicsData.Graphics.GraphicsDevice.Viewport.Width; w += (int)cellSize.X)
+                GraphicsData.SpriteBatch.DrawPixel(new Vector2(w, 0), new Vector2(pixelWidth, GraphicsData.Graphics.GraphicsDevice.Viewport.Height), gridColor);
         }
 
-        public void Draw(GameTime gameTime, GraphicsData graphicsData)
+        public void Draw(GameTime gameTime, GraphicsData GraphicsData)
         {
-            graphicsData.SpriteBatch.Begin();
-            DrawMap(graphicsData);
-            DrawGrid(graphicsData);
-            graphicsData.SpriteBatch.End();
+            GraphicsData.SpriteBatch.Begin();
+            DrawMap(GraphicsData);
+            DrawGrid(GraphicsData);
+            GraphicsData.SpriteBatch.End();
         }
 
         public void Update(GameTime gameTime)
@@ -92,11 +92,5 @@ namespace MonoGame1.Layers
                 worldCalculator.Tick();
             }
         }
-
-        //public void FirstDrawCall(GameTime gameTime, GraphicsData graphicsData)
-        //{
-        //    DrawGrid(graphicsData);
-        //}
-     
     }
 }

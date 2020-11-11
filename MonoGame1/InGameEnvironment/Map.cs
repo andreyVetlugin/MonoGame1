@@ -17,10 +17,10 @@ namespace MonoGame1.InGameEnvironment
     public enum Direction
     {
         None = 0,
-        Up=1,
-        Down = 2,        
+        Up = 1,
+        Down = 2,
         Right = 3,
-        Left = 4,        
+        Left = 4,
     }
 
     public class Map
@@ -56,6 +56,7 @@ namespace MonoGame1.InGameEnvironment
             }
             return new Point(0, 0);
         }
+
         static public Direction GetDiretionByPoints(Point startPoint, Point endPoint)
         {
             var resultPoint = endPoint - startPoint;
@@ -70,6 +71,34 @@ namespace MonoGame1.InGameEnvironment
             return Direction.None;
         }
 
+        static public List<Point> GetCoordinatesByDirections(Point startPoint, List<Direction> directions)
+        {
+            Point currentPoint = startPoint;
+            var path = new List<Point>();
+            for (var i = 0; i < directions.Count; i++)
+            {
+                switch (directions[i])
+                {
+                    case Direction.Down:
+                        path.Add(currentPoint + new Point(0, -1));
+                        currentPoint = currentPoint + new Point(0, -1);
+                        break;
+                    case Direction.Up:
+                        path.Add(currentPoint + new Point(0, 1));
+                        currentPoint = currentPoint + new Point(0, 1);
+                        break;
+                    case Direction.Right:
+                        path.Add(currentPoint + new Point(1, 0));
+                        currentPoint = currentPoint + new Point(1, 0);
+                        break;
+                    case Direction.Left:
+                        path.Add(currentPoint + new Point(-1, 0));
+                        currentPoint = currentPoint + new Point(-1, 0);
+                        break;
+                }
+            }
+            return path;
+        }
 
         static public bool IsCellPassable(MapCell cell)
         {
@@ -92,7 +121,7 @@ namespace MonoGame1.InGameEnvironment
             return true;
         }
 
-        public bool IsCoordInsideMap(Point coord)
+        public bool Contains(Point coord)
         {
             return coord.X >= 0 && coord.X < Size.X && coord.Y >= 0 && coord.Y < Size.Y;
         }
@@ -110,9 +139,12 @@ namespace MonoGame1.InGameEnvironment
             Cells = new MapCell[Size.X, Size.Y];
         }
 
-        public Map()
+        public Map(string pathToMap, int lootBoxesCount)
         {
-
+            if (pathToMap != null && pathToMap.Length != 0)
+                LoadMapFromFile(pathToMap);
+            SpawnPlayer();
+            SpawnLootBoxes(lootBoxesCount);
         }
 
         private bool TryToFindPlayerPosition()
@@ -127,13 +159,6 @@ namespace MonoGame1.InGameEnvironment
             return false; // на карте нет игрока 
         }
 
-        public void LoadMapFromFile(string pathToFileWithMap)
-        {
-            StreamReader reader = new StreamReader(pathToFileWithMap);
-            if (TryToFindPlayerPosition() == false)
-                SpawnPlayer();
-        }
-
         public void LoadMapFromNothing()
         {
             Cells = new MapCell[5, 5] { { MapCell.Player, MapCell.None, MapCell.None, MapCell.None, MapCell.None },
@@ -146,9 +171,89 @@ namespace MonoGame1.InGameEnvironment
                 SpawnPlayer();
         }
 
-        public void SpawnPlayer()
+        public void LoadMapFromFile(string path)
         {
-            Cells[0, 0] = MapCell.Player;
+            List<string> lines = new List<string>();
+            using (var file = new StreamReader(path))
+            {
+                string currentLine;
+                while ((currentLine = file.ReadLine()) != null)
+                {
+                    lines.Add(currentLine);
+                }
+            }
+            if (lines.Count == 0)
+                return;// ???????? что делать 
+            Size = new Point(lines[0].Length, lines.Count);
+            Cells = new MapCell[Size.X, Size.Y];
+            for (var i = 0; i < Size.X; i++)
+            {
+                for (var j = 0; j < Size.Y; j++)
+                {
+                    Cells[i, j] = ConvertSymbolToMapCell(lines[j][i]);
+                }
+            }
+        }
+
+        private MapCell ConvertSymbolToMapCell(char c)
+        {
+            switch (c)
+            {
+                case '-':
+                    return MapCell.LiveBlock;
+                case '+':
+                    return MapCell.None;
+                case ' ':
+                    return MapCell.Block;
+            }
+            return MapCell.None;
+        }
+
+        private void SpawnLootBoxes(int count)
+        {
+            var emptyCells = FindEmptyCells();
+            count = emptyCells.Count < count ? emptyCells.Count : count;
+            if (emptyCells.Count > 0)
+            {
+                emptyCells = FindEmptyCells();
+                var random = new Random().Next(emptyCells.Count);
+                Cells[emptyCells[random].X, emptyCells[random].Y] = MapCell.LootBox;
+                emptyCells = FindEmptyCells();
+            }
+        }
+
+        private void SpawnPlayer()
+        {
+            var emptyCells = FindEmptyCells();
+            if (emptyCells.Count > 0)
+            {
+                var random = new Random().Next(emptyCells.Count);
+                playerPosition = emptyCells[random];
+                Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.Player;
+            }
+        }
+
+        public List<Point> GetLootCoordinates()
+        {
+            List<Point> lootCoordinates = new List<Point>();
+            for (var i = 0; i < Size.X; i++)
+                for (var j = 0; j < Size.Y; j++)
+                {
+                    if (Cells[i, j] == MapCell.LootBox)
+                        lootCoordinates.Add(new Point(i, j));
+                }
+
+            return lootCoordinates;
+        }
+
+        private List<Point> FindEmptyCells()
+        {
+            var potentialSpawnCells = new List<Point>();
+            for (int i = 0; i < Size.X; i++)
+                for (int j = 0; j < Size.Y; j++)
+                    if (Cells[i, j] == MapCell.None)
+                        potentialSpawnCells.Add(new Point(i, j));
+            return potentialSpawnCells;
         }
     }
 }

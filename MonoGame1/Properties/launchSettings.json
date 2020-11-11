@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MonoGame1": {
+      "commandName": "Project",
+      "commandLineArgs": "qwe 1.txt 2.txt 3"
+    }
+  }
+}

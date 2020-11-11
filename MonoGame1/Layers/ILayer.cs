@@ -10,9 +10,9 @@ namespace MonoGame1.Layers
     {
         public void Update(GameTime gameTime);
 
-        public void Draw(GameTime gameTime, GraphicsData graphicsData);
+        public void Draw(GameTime gameTime, GraphicsData GraphicsData);
 
-        //public void FirstDrawCall(GameTime gameTime, GraphicsData graphicsData);
+        //public void FirstDrawCall(GameTime gameTime, GraphicsData GraphicsData);
 
         //public void FirstUpdateCAll(GameTime gameTime);
     }

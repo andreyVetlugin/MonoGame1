@@ -17,7 +17,17 @@ namespace MonoGame1.Gui
         {
             get; private set;
         }
-        public Vector2 BoundSize { get; private set; }
+
+        private Point boundSize;
+        public Point BoundSize
+        {
+            get
+            {
+                if (boundSize == null) SetBoundSize();
+                return boundSize;
+            }
+            private set { boundSize = value; }
+        }
 
         private int padding;
         public int Padding
@@ -53,14 +63,17 @@ namespace MonoGame1.Gui
 
         private void SetBoundSize()
         {
+            if (messageFont == null)
+                return;
             var messageTextSize = MessageFont.MeasureString(MessageText);
-            BoundSize = new Vector2(messageTextSize.X + 2 * Padding, messageTextSize.Y + 2 * Padding);
+            BoundSize = new Point((int)messageTextSize.X + 2 * Padding, (int)messageTextSize.Y + 2 * Padding);
         }
 
-        public void Draw(Point position, GraphicsData graphicsData)
+        public void Draw(Point position, GraphicsData GraphicsData)
         {
-            graphicsData.SpriteBatch.DrawRectangle(position.ToVector2(), BoundSize, BoundColor);
-            graphicsData.SpriteBatch.DrawString(MessageFont, MessageText, position.ToVector2() + new Vector2(Padding), TextColor);
+            Bound = new Rectangle(position, BoundSize);
+            GraphicsData.SpriteBatch.DrawRectangle(position.ToVector2(), BoundSize.ToVector2(), BoundColor);
+            GraphicsData.SpriteBatch.DrawString(MessageFont, MessageText, position.ToVector2() + new Vector2(Padding), TextColor);
         }
     }
 }

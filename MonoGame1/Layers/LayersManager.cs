@@ -1,8 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using MonoGame1.InGameEnvironment;
 using MonoGame1.RenderTools;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MonoGame1.Layers
 {
@@ -15,8 +13,10 @@ namespace MonoGame1.Layers
 
         public LayersManager(Game1 game)
         {
-            gameLayer = new GameLayer();
-            mainMenuLayer = new MainMenuLayer();
+            gameLayer = new GameLayer(new Map(game.PathForDownloadMap, game.LootBoxCount));
+            mainMenuLayer = new MainMenuLayer(game.GraphicsData.MainMenuFont);
+            mainMenuLayer.TryToSetHandleForButton("Exit", game.Exit);
+            mainMenuLayer.TryToSetHandleForButton("Play", ChangeLayerToGame);
             this.game = game;
             mainMenuLayer.ExitLayer += game.Exit;
             ChangeLayerToMainMenu();
@@ -45,9 +45,9 @@ namespace MonoGame1.Layers
             CurrentLayer.Update(time);
         }
 
-        public void DrawLayer(GameTime time, GraphicsData graphicsData)
+        public void DrawLayer(GameTime time, GraphicsData GraphicsData)
         {
-            CurrentLayer.Draw(time,graphicsData);
+            CurrentLayer.Draw(time,GraphicsData);
         }
     }
 }

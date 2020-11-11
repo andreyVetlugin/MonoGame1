@@ -2,10 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace MonoGame1.InGameEnvironment.MapExtentions
 {
@@ -19,6 +15,13 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
         private Stack<Direction> path;
         private int[,] stepsMap;
         private WorldActivityCalculator worldCalculator;
+
+        public List<Point> GetCoordinatePath()
+        {
+            var directionPath = path.ToList();
+            return Map.GetCoordinatesByDirections(CurrentMap.PlayerPosition, directionPath);
+
+        }
 
         public Direction GetNextStep() // Что делать, если достали последнюю точку .. а если больше нет лутбоксов ?
         {
@@ -46,9 +49,9 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
             var cellsOrderOfPath = TryToCreateCellsPathFromStepsMap(stepsMap, lootCoord);  // изменить координату игрока и убрать loot box перед след поиском return path;
             var previousCell = cellsOrderOfPath.Pop();
             while (cellsOrderOfPath.Count > 0)
-            {                
+            {
                 path.Push(Map.GetDiretionByPoints(previousCell, cellsOrderOfPath.Peek()));
-                previousCell = cellsOrderOfPath.Pop();   
+                previousCell = cellsOrderOfPath.Pop();
             }
         }
 
@@ -63,7 +66,6 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
             Point? findedLootBoxCoordinate = null;
             var lastStepVisitedCells = new List<Point>() { CurrentMap.PlayerPosition };
 
-
             while (lastStepVisitedCells.Count > 0 && findedLootBoxCoordinate == null)
             {
                 stepCount++;
@@ -77,10 +79,10 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
                         {
                             var currentCellCoord = new Point(visitedCellCoord.X + dx, visitedCellCoord.Y + dy);
 
-                            if (dx * dy != 0 || !CurrentMap.IsCoordInsideMap(currentCellCoord))
+                            if (dx * dy != 0 || !CurrentMap.Contains(currentCellCoord))
                                 continue;
 
-                            var currentCellValue = CurrentMap.Cells[currentCellCoord.X, currentCellCoord.Y];
+                            var currentCellValue = CurrentMap.Cells[currentCellCoord.X , currentCellCoord.Y ];
 
                             if (stepsMap[currentCellCoord.X, currentCellCoord.Y] == 0)
                             {

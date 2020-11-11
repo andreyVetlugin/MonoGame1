@@ -1,35 +1,43 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using MonoGame1.Layers;
+using MonoGame1.Logs;
 using MonoGame1.RenderTools;
 using System;
 using System.Collections;
+using System.IO;
 
 namespace MonoGame1
 {
     public class Game1 : Game
     {
-        GraphicsData graphicsData;
+        public GraphicsData GraphicsData;
         LayersManager layersManager;
 
-        public Game1()
-        {
-            graphicsData = new GraphicsData { Graphics = new GraphicsDeviceManager(this) };
+        public readonly string PathForDownloadMap;
+        public readonly string OutputPath;
+        public readonly int LootBoxCount;
 
+        public Game1(string pathForDownloadMap, string outPutPath, int lootBoxCount)
+        {
+            PathForDownloadMap = pathForDownloadMap;
+            OutputPath = outPutPath;
+            LootBoxCount = lootBoxCount;
+
+            GraphicsData = new GraphicsData { Graphics = new GraphicsDeviceManager(this) };
         }
 
         protected override void Initialize()
         {
-            graphicsData.SpriteBatch = new SpriteBatchExtended(graphicsData.Graphics.GraphicsDevice);
+            base.Initialize();
+            GraphicsData.SpriteBatch = new SpriteBatchExtended(GraphicsData.Graphics.GraphicsDevice);
             layersManager = new LayersManager(this);
             layersManager.ChangeLayerToMainMenu();
-            base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            graphicsData.MainMenuFont = Content.Load<SpriteFont>("Content/File");
+            GraphicsData.MainMenuFont = Content.Load<SpriteFont>("Content/File");
         }
 
         protected override void UnloadContent()
@@ -41,12 +49,27 @@ namespace MonoGame1
         {
             layersManager.UpdateLayer(gameTime);
             base.Update(gameTime);
-            
         }
+
+        public void SaveGameLogToFile(GameInfoLog log)
+        {
+            using (var writer = new StreamWriter(OutputPath))
+            {
+                writer.WriteLine("Start position: ");
+                writer.WriteLine(log.SpawnCoordinate.ToString());
+                writer.WriteLine("Lootbooxes positions: ");
+                for (var i = 0; i < log.LootBoxCoordinates.Count; i++)
+                    writer.WriteLine(log.LootBoxCoordinates[i].ToString());
+                writer.WriteLine("Path: ");
+                for (var i = 0; i < log.Path.Count; i++)
+                    writer.WriteLine(log.Path[i].ToString());
+            }
+        }
+
         protected override void Draw(GameTime gameTime) // сделать здесь на делегатах и событиях логику
         {
-            graphicsData.Graphics.GraphicsDevice.Clear(Color.Black);
-            layersManager.DrawLayer(gameTime, graphicsData);
+            GraphicsData.Graphics.GraphicsDevice.Clear(Color.Black);
+            layersManager.DrawLayer(gameTime, GraphicsData);
             base.Draw(gameTime);
         }
     }
