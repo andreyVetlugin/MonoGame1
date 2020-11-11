@@ -113,9 +113,20 @@ namespace MonoGame1.InGameEnvironment
             TryToFindPlayerPosition();
         }
 
+        public bool ChangePlayerPosition(Point newPosition)
+        {
+            if (!Contains(newPosition))
+                return false;
+            Cells[PlayerPosition.X, PlayerPosition.Y] = MapCell.None;
+            playerPosition = newPosition;
+            Cells[PlayerPosition.X, PlayerPosition.Y] = MapCell.Player;
+            return true;
+        }
+
         public bool TryToMovePlayer(Direction moveDirection)
         {
-            Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.None;
+            if (Cells[playerPosition.Value.X, playerPosition.Value.Y] == MapCell.Player)
+                Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.None;
             playerPosition += GetMoveVectorByDirection(moveDirection);
             Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.Player;
             return true;
@@ -147,7 +158,7 @@ namespace MonoGame1.InGameEnvironment
             SpawnLootBoxes(lootBoxesCount);
         }
 
-        private bool TryToFindPlayerPosition()
+        public bool TryToFindPlayerPosition()
         {
             for (int i = 0; i < Size.X; i++)
                 for (int j = 0; j < Size.Y; j++)
@@ -213,13 +224,17 @@ namespace MonoGame1.InGameEnvironment
         {
             var emptyCells = FindEmptyCells();
             count = emptyCells.Count < count ? emptyCells.Count : count;
-            if (emptyCells.Count > 0)
+            for (var i = 0; i < count; i++)
             {
-                emptyCells = FindEmptyCells();
-                var random = new Random().Next(emptyCells.Count);
-                Cells[emptyCells[random].X, emptyCells[random].Y] = MapCell.LootBox;
-                emptyCells = FindEmptyCells();
+                if (emptyCells.Count > 0)
+                {
+                    emptyCells = FindEmptyCells();
+                    var random = new Random().Next(emptyCells.Count);
+                    Cells[emptyCells[random].X, emptyCells[random].Y] = MapCell.LootBox;
+                }
             }
+
+            //Cells[0, 2] = MapCell.LootBox;
         }
 
         private void SpawnPlayer()
@@ -227,10 +242,13 @@ namespace MonoGame1.InGameEnvironment
             var emptyCells = FindEmptyCells();
             if (emptyCells.Count > 0)
             {
+
                 var random = new Random().Next(emptyCells.Count);
                 playerPosition = emptyCells[random];
                 Cells[playerPosition.Value.X, playerPosition.Value.Y] = MapCell.Player;
             }
+            //Cells[2, 1] = MapCell.Player;
+            //playerPosition = new Point(2, 1);
         }
 
         public List<Point> GetLootCoordinates()

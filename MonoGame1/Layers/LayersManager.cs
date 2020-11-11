@@ -9,7 +9,7 @@ namespace MonoGame1.Layers
         private Game1 game;
         private GameLayer gameLayer;
         private MainMenuLayer mainMenuLayer;
-        public ILayer CurrentLayer {  get; private set; }
+        public ILayer CurrentLayer { get; private set; }
 
         public LayersManager(Game1 game)
         {
@@ -18,6 +18,7 @@ namespace MonoGame1.Layers
             mainMenuLayer.TryToSetHandleForButton("Exit", game.Exit);
             mainMenuLayer.TryToSetHandleForButton("Play", ChangeLayerToGame);
             this.game = game;
+            gameLayer.AcceptGameInfo += game.SaveGameLogToFile;
             mainMenuLayer.ExitLayer += game.Exit;
             ChangeLayerToMainMenu();
         }
@@ -47,7 +48,7 @@ namespace MonoGame1.Layers
 
         public void DrawLayer(GameTime time, GraphicsData GraphicsData)
         {
-            CurrentLayer.Draw(time,GraphicsData);
+            CurrentLayer.Draw(time, GraphicsData);
         }
     }
 }

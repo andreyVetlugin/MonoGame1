@@ -18,8 +18,8 @@ namespace MonoGame1.InGameEnvironment
 
         public void Tick()
         {
-            var mapAfterTick = new MapCell[currentMap.Size.X, currentMap.Size.Y];
-            Array.Copy(currentMap.Cells, mapAfterTick, mapAfterTick.Length);
+            var mapBeforeTick = new MapCell[currentMap.Size.X, currentMap.Size.Y];
+            Array.Copy(currentMap.Cells, mapBeforeTick, mapBeforeTick.Length);
             for (int x = 0; x < currentMap.Size.X; x++)
             {
                 for (int y = 0; y < currentMap.Size.Y; y++)
@@ -34,22 +34,22 @@ namespace MonoGame1.InGameEnvironment
                         {
                             if (y + j >= currentMap.Size.Y || y + j < 0 || (i == 0 && j == 0))
                                 continue;
-                            if (currentMap.Cells[x + i, j + y] == MapCell.LiveBlock)
+                            if (mapBeforeTick[x + i, j + y] == MapCell.LiveBlock)
                                 livingCellsAroundCurrentCell++;
                         }
                     }
 
-                    bool currentCellIsAlive = currentMap.Cells[x, y] == MapCell.LiveBlock ? true : false;
+                    bool currentCellIsAlive = mapBeforeTick[x, y] == MapCell.LiveBlock ? true : false;
 
                     if (currentCellIsAlive && (livingCellsAroundCurrentCell == 2 || livingCellsAroundCurrentCell == 3))
-                        mapAfterTick[x, y] = MapCell.LiveBlock;
-                    else if (!currentCellIsAlive && livingCellsAroundCurrentCell == 3 && (currentMap.Cells[x, y] == MapCell.None || currentMap.Cells[x, y] == MapCell.Player))
-                        mapAfterTick[x, y] = MapCell.LiveBlock;
-                    else if (currentMap.Cells[x, y] == MapCell.None || currentMap.Cells[x, y] == MapCell.LiveBlock)
-                        mapAfterTick[x, y] = MapCell.None;
+                        currentMap.Cells[x, y] = MapCell.LiveBlock;
+                    else if (!currentCellIsAlive && livingCellsAroundCurrentCell == 3 && (mapBeforeTick[x, y] == MapCell.None || mapBeforeTick[x, y] == MapCell.Player))
+                        currentMap.Cells[x, y] = MapCell.LiveBlock;
+                    else if (mapBeforeTick[x, y] == MapCell.None || mapBeforeTick[x, y] == MapCell.LiveBlock)
+                        currentMap.Cells[x, y] = MapCell.None;
                 }
             }
-            currentMap.Cells = mapAfterTick;
+            //currentMap.Cells = mapAfterTick;
         }
     }
 }

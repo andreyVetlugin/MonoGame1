@@ -88,8 +88,8 @@ namespace MonoGame1.Layers
             if (elapsedTimeFromLastStep >= stepTime)
             {
                 elapsedTimeFromLastStep = TimeSpan.Zero;
-                map.TryToMovePlayer(playerPathManager.GetNextStep());
                 worldCalculator.Tick();
+                map.TryToMovePlayer(playerPathManager.GetNextStep());
             }
         }
     }

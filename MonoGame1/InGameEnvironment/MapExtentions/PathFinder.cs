@@ -45,19 +45,39 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
             worldCalculator = new WorldActivityCalculator(startMap);
             CurrentMap = worldCalculator.currentMap;
 
-            var (stepsMap, lootCoord) = CreateStepsMapToClosestLootBox();
-            var cellsOrderOfPath = TryToCreateCellsPathFromStepsMap(stepsMap, lootCoord);  // изменить координату игрока и убрать loot box перед след поиском return path;
-            var previousCell = cellsOrderOfPath.Pop();
-            while (cellsOrderOfPath.Count > 0)
+            Point? lootCoord = null;
+            int[,] stepsMap;
+            var cellsOrderOfPath = new List<Point>() { CurrentMap.PlayerPosition};
+            (stepsMap, lootCoord) = CreateStepsMapToClosestLootBox(worldCalculator);
+            while (lootCoord != null)
             {
-                path.Push(Map.GetDiretionByPoints(previousCell, cellsOrderOfPath.Peek()));
-                previousCell = cellsOrderOfPath.Pop();
+                CurrentMap.ChangePlayerPosition(lootCoord.Value);
+                var swapList = cellsOrderOfPath;
+                cellsOrderOfPath = TryToCreateCellsPathFromStepsMap(stepsMap, lootCoord);
+                cellsOrderOfPath.RemoveAt(cellsOrderOfPath.Count-1);
+                cellsOrderOfPath.AddRange(swapList);
+                (stepsMap, lootCoord) = CreateStepsMapToClosestLootBox(worldCalculator);
+            }
+
+
+            //TryToCreateCellsPathFromStepsMap(stepsMap, lootCoord);  // изменить координату игрока и убрать loot box перед след поиском return path;
+
+            if (cellsOrderOfPath != null && cellsOrderOfPath.Count > 2)
+            {
+                var previousCell = cellsOrderOfPath[0];
+                for (int i = 1; i < cellsOrderOfPath.Count; i++)
+                {
+                    var currentCell = cellsOrderOfPath[i];
+                    path.Push(Map.GetDiretionByPoints(currentCell, previousCell));
+                    previousCell = currentCell;
+                }
             }
         }
 
-        private (int[,] map, Point? lootCoord) CreateStepsMapToClosestLootBox()
+        private (int[,] map, Point? lootCoord) CreateStepsMapToClosestLootBox(WorldActivityCalculator worldCalculator)
         {
-            worldCalculator = new WorldActivityCalculator(startMap);
+            //worldCalculator = new WorldActivityCalculator(startMap);
+
             CurrentMap = worldCalculator.currentMap;
             stepsMap = new int[CurrentMap.Size.X, CurrentMap.Size.Y];
             int stepCount = 1;
@@ -68,6 +88,7 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
 
             while (lastStepVisitedCells.Count > 0 && findedLootBoxCoordinate == null)
             {
+                worldCalculator.Tick();
                 stepCount++;
                 var currentStepVisitedCells = new List<Point>();
                 for (int i = 0; i < lastStepVisitedCells.Count; i++)
@@ -82,7 +103,7 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
                             if (dx * dy != 0 || !CurrentMap.Contains(currentCellCoord))
                                 continue;
 
-                            var currentCellValue = CurrentMap.Cells[currentCellCoord.X , currentCellCoord.Y ];
+                            var currentCellValue = CurrentMap.Cells[currentCellCoord.X, currentCellCoord.Y];
 
                             if (stepsMap[currentCellCoord.X, currentCellCoord.Y] == 0)
                             {
@@ -100,29 +121,34 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
                 }
 
                 lastStepVisitedCells = currentStepVisitedCells;
-                worldCalculator.Tick();
-
             }
             return (stepsMap, findedLootBoxCoordinate);
         }
 
-        private Stack<Point> TryToCreateCellsPathFromStepsMap(int[,] stepsMap, Point? endCoord)
+
+        private List<Point> TryToCreateCellsPathFromStepsMap(int[,] stepsMap, Point? endCoord)
         {
             if (endCoord == null)
                 return null;
 
-            var path = new Stack<Point>();
-            path.Push(endCoord.Value);
-            while (stepsMap[path.Peek().X, path.Peek().Y] != 1)// пока не стартовая позиция игрока
+            var path = new List<Point>();
+            path.Add(endCoord.Value);
+            var lastPoint = path[0];
+            while (stepsMap[lastPoint.X, lastPoint.Y] != 1)// пока не стартовая позиция игрока
             {
+                bool valueSetsOnThisStep = false;
                 for (var x = -1; x <= 1; x++)
                     for (var y = -1; y <= 1; y++)
                     {
-                        if (path.Peek().X + x >= stepsMap.GetLength(0) || path.Peek().X + x < 0
-                            || path.Peek().Y + y >= stepsMap.GetLength(1) || path.Peek().Y + y < 0)
+                        if (valueSetsOnThisStep || lastPoint.X + x >= stepsMap.GetLength(0) || lastPoint.X + x < 0
+                            || lastPoint.Y + y >= stepsMap.GetLength(1) || lastPoint.Y + y < 0)
                             continue;
-                        if (stepsMap[path.Peek().X + x, path.Peek().Y + y] == stepsMap[path.Peek().X, path.Peek().Y] - 1)
-                            path.Push(new Point(path.Peek().X + x, path.Peek().Y + y));// как выйти из while после этого??
+                        if (stepsMap[lastPoint.X + x, lastPoint.Y + y] == stepsMap[lastPoint.X, path.Last().Y] - 1)
+                        {
+                            path.Add(new Point(lastPoint.X + x, lastPoint.Y + y));// как выйти из while после этого??
+                            lastPoint = new Point(lastPoint.X + x, lastPoint.Y + y);
+                            valueSetsOnThisStep = true;
+                        }
                     }
             }
 
