@@ -21,17 +21,19 @@ namespace MonoGame1.Layers
 
         public event Action<GameInfoLog> AcceptGameInfo;
 
-        public GameLayer(Map map )
+        public GameLayer(Map map)
         {
-            var mapAsPattern = map;
+            this.map = map;
+        }
 
-            worldCalculator = new WorldActivityCalculator(mapAsPattern);
+        public void Initialize()
+        {
+            worldCalculator = new WorldActivityCalculator(map);
             this.map = worldCalculator.currentMap;
-
-            playerPathManager = new PathManager(mapAsPattern);
+            playerPathManager = new PathManager(map);
             playerPathManager.FindPathToClosestLootBox();
             AcceptGameInfo?.Invoke
-                (new GameInfoLog(playerPathManager.GetCoordinatePath(),map.GetLootCoordinates(),map.PlayerPosition));
+                (new GameInfoLog(playerPathManager.GetCoordinatePath(), map.GetLootCoordinates(), map.PlayerPosition));
         }
 
         public void DrawMap(GraphicsData GraphicsData)
@@ -59,7 +61,7 @@ namespace MonoGame1.Layers
             }
         }
 
-        private void DrawMapObjectCell(GraphicsData GraphicsData, Color color,int x,int y)
+        private void DrawMapObjectCell(GraphicsData GraphicsData, Color color, int x, int y)
         {
             GraphicsData.SpriteBatch.DrawPixel(new Vector2(x * cellSize.X + 3, y * cellSize.Y + 3), new Vector2(cellSize.X - 4, cellSize.Y - 4), color);
         }

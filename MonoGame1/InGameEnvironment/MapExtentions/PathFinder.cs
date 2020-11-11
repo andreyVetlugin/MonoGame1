@@ -59,7 +59,6 @@ namespace MonoGame1.InGameEnvironment.MapExtentions
                 (stepsMap, lootCoord) = CreateStepsMapToClosestLootBox(worldCalculator);
             }
 
-
             //TryToCreateCellsPathFromStepsMap(stepsMap, lootCoord);  // изменить координату игрока и убрать loot box перед след поиском return path;
 
             if (cellsOrderOfPath != null && cellsOrderOfPath.Count > 2)

@@ -19,6 +19,7 @@ namespace MonoGame1.Layers
             mainMenuLayer.TryToSetHandleForButton("Play", ChangeLayerToGame);
             this.game = game;
             gameLayer.AcceptGameInfo += game.SaveGameLogToFile;
+            gameLayer.Initialize();
             mainMenuLayer.ExitLayer += game.Exit;
             ChangeLayerToMainMenu();
         }
