@@ -30,6 +30,7 @@ namespace MonoGame1.Gui
                 if (button.BoundSize.X > maxSize.X)
                     maxSize.X = (int)button.BoundSize.X;
                 maxSize.Y += button.BoundSize.Y;
+                maxSize.Y += distanceBetweenButtons;
             }
             Size = maxSize;
         }

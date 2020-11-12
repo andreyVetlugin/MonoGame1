@@ -1,9 +1,8 @@
 {
   "profiles": {
     "MonoGame1": {
-      "commandName": "Executable",
-      "executablePath": "C:\\Users\\andre\\source\\repos\\MonoGame1\\MonoGame1\\bin\\Release\\netcoreapp3.1\\MonoGame1.exe",
-      "commandLineArgs": "qwe 1.txt 2.txt 3"
+      "commandName": "Project",
+      "commandLineArgs": "../../../1.txt 2.txt 3"
     }
   }
 }
